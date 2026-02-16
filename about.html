@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio | About</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0f172a; color: white; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6">
+
+    <nav class="fixed top-8 glass px-8 py-3 rounded-full flex gap-10 z-50">
+        <a href="index.html" class="hover:text-sky-400 transition tracking-widest text-xs uppercase">Home</a>
+        <a href="projects.html" class="hover:text-sky-400 transition tracking-widest text-xs uppercase">Projects</a>
+        <a href="about.html" class="text-sky-400 font-bold tracking-widest text-xs uppercase">About</a>
+    </nav>
+
+    <div class="max-w-4xl grid md:grid-cols-2 gap-12 items-center">
+        <div>
+            <h2 class="text-5xl font-black uppercase mb-6">The Engineer</h2>
+            <p class="text-gray-400 leading-relaxed mb-6">
+                Currently pursuing a degree in Information Technology at DBATU. I specialize in bridging the gap between traditional engineering mechanics and modern AI workflows.
+            </p>
+            <div class="flex flex-wrap gap-3">
+                <span class="px-4 py-2 glass rounded text-xs font-mono">C / C++</span>
+                <span class="px-4 py-2 glass rounded text-xs font-mono">Python</span>
+                <span class="px-4 py-2 glass rounded text-xs font-mono">Tailwind CSS</span>
+                <span class="px-4 py-2 glass rounded text-xs font-mono">AI / n8n</span>
+            </div>
+        </div>
+        
+        <div class="glass p-10 rounded-3xl">
+            <h4 class="text-sky-500 font-bold mb-4 uppercase text-xs">Education & Focus</h4>
+            <ul class="space-y-4">
+                <li class="border-b border-white/10 pb-2">
+                    <p class="font-bold">B.Tech in IT</p>
+                    <p class="text-sm text-gray-500">First Year Student</p>
+                </li>
+                <li>
+                    <p class="font-bold">Engineering Mechanics</p>
+                    <p class="text-sm text-gray-500">Coplanar Force Systems & Design</p>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
