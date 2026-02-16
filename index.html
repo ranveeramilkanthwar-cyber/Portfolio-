@@ -3,125 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GTA V Style Portfolio</title>
+    <title>GTA V Tethered 3D</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.cdnfonts.com/css/pricedown'); /* GTA Font */
-
-        body { margin: 0; overflow: hidden; background: radial-gradient(circle, #1a1a1a, #000); touch-action: none; }
+        @import url('https://fonts.cdnfonts.com/css/pricedown');
+        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Pricedown', sans-serif; }
         
-        /* GTA V Glassmorphism & UI */
-        .gta-button {
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(5px);
+        /* GTA Style for tethered buttons */
+        .gta-label {
+            background: rgba(0, 0, 0, 0.85);
             border-left: 4px solid #fff;
             color: white;
-            padding: 15px 40px;
-            font-family: 'Pricedown', sans-serif;
-            font-size: 24px;
-            letter-spacing: 2px;
-            transition: all 0.2s;
-            pointer-events: auto;
+            padding: 10px 20px;
+            font-size: 18px;
             text-decoration: none;
-            position: absolute;
+            white-space: nowrap;
+            pointer-events: auto;
+            transition: 0.2s;
+            box-shadow: 5px 5px 0px #46a049;
         }
+        .gta-label:active { background: #fff; color: #000; transform: scale(1.1); }
 
-        .gta-button:active {
-            background: #fff;
-            color: #000;
-            transform: skewX(-10deg) scale(1.1);
+        #overlay {
+            position: fixed; inset: 0; background: #000; z-index: 1000;
+            display: flex; justify-content: center; align-items: center; color: white;
         }
-
-        /* HUD Elements */
-        .hud-top {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            text-align: right;
-            color: #fff;
-            font-family: 'Pricedown', sans-serif;
-            pointer-events: none;
-        }
-
-        .money { color: #46a049; font-size: 32px; }
     </style>
 </head>
 <body>
 
-    <div class="hud-top">
-        <div class="text-xl">FEBRUARY 2026</div>
-        <div class="money">$1,000,000</div>
+    <div id="overlay">
+        <button id="start-btn" class="px-8 py-4 border-2 border-white text-2xl">START EXPERIENCE</button>
     </div>
 
-    <div id="canvas-container"></div>
-
-    <div id="ui-wrapper" class="absolute inset-0 pointer-events-none flex items-center justify-between px-10">
-        <a href="projects.html" id="btn-left" class="gta-button" style="left: 10%;">PROJECTS</a>
-        <a href="about.html" id="btn-right" class="gta-button" style="right: 10%;">ABOUT</a>
+    <div class="fixed top-5 right-5 z-50 text-right pointer-events-none">
+        <div class="text-green-500 text-4xl">$2,000,000</div>
+        <div class="text-white text-xl">CONNECTED WORLD</div>
     </div>
+
+    <div id="container"></div>
 
     <script type="importmap">
-        {
-          "imports": {
-            "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
-          }
-        }
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
 
     <script type="module">
         import * as THREE from 'three';
+        // We use CSS2DRenderer to make HTML follow 3D objects
+        import { CSS2DRenderer, CSS2DObject } from 'https://unpkg.com/three@0.160.0/examples/jsm/renderers/CSS2DRenderer.js';
 
-        // Scene Setup
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.getElementById('canvas-container').appendChild(renderer.domElement);
+        let scene, camera, renderer, labelRenderer, worldObject;
+        let lon = 0, lat = 0, gyroX = 0, gyroY = 0;
 
-        // 1. Colorful 3D Object (Torus Knot)
-        const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16);
-        const material = new THREE.MeshNormalMaterial({ wireframe: false }); // MeshNormal makes it very colorful
-        const worldObject = new THREE.Mesh(geometry, material);
-        scene.add(worldObject);
+        function init() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1100);
 
-        camera.position.z = 45;
+            // 1. Background Video Sphere
+            const video = document.createElement('video');
+            video.src = 'https://assets.mixkit.co/videos/preview/mixkit-top-view-of-a-group-of-elephants-4441-large.mp4'; // Replace with GTA Animal Clip
+            video.loop = true; video.muted = true; video.play();
+            
+            const videoTexture = new THREE.VideoTexture(video);
+            const skyGeo = new THREE.SphereGeometry(500, 60, 40);
+            skyGeo.scale(-1, 1, 1);
+            const sky = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ map: videoTexture, opacity: 0.4, transparent: true }));
+            scene.add(sky);
 
-        // 2. Touch & Motion Logic
-        let targetRotY = 0;
-        let targetRotX = 0;
-        const btnLeft = document.getElementById('btn-left');
-        const btnRight = document.getElementById('btn-right');
+            // 2. The Central 3D Object (The Anchor)
+            const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16);
+            const material = new THREE.MeshNormalMaterial({ wireframe: true });
+            worldObject = new THREE.Mesh(geometry, material);
+            scene.add(worldObject);
 
-        document.addEventListener('touchmove', (e) => {
-            const touch = e.touches[0];
-            targetRotY = (touch.pageX - window.innerWidth / 2) * 0.005;
-            targetRotX = (touch.pageY - window.innerHeight / 2) * 0.005;
-        }, { passive: true });
+            // 3. Tethering the Buttons
+            const createButton = (text, url, xPos) => {
+                const btn = document.createElement('a');
+                btn.href = url;
+                btn.className = 'gta-label';
+                btn.textContent = text;
+                const obj = new CSS2DObject(btn);
+                obj.position.set(xPos, 0, 0); // Position relative to the center of the worldObject
+                return obj;
+            };
 
-        // 3. Animation Loop
+            const projectBtn = createButton('PROJECTS', 'projects.html', -18);
+            const aboutBtn = createButton('ABOUT ME', 'about.html', 18);
+            
+            worldObject.add(projectBtn); // Attached to the 3D shape
+            worldObject.add(aboutBtn);   // Attached to the 3D shape
+
+            // 4. Renderers
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.getElementById('container').appendChild(renderer.domElement);
+
+            labelRenderer = new CSS2DRenderer();
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.domElement.style.position = 'absolute';
+            labelRenderer.domElement.style.top = '0px';
+            document.getElementById('container').appendChild(labelRenderer.domElement);
+
+            setupControls();
+            animate();
+        }
+
+        function setupControls() {
+            document.addEventListener('pointermove', (e) => {
+                lon += e.movementX * 0.1;
+                lat -= e.movementY * 0.1;
+            });
+
+            window.addEventListener('deviceorientation', (e) => {
+                gyroX = e.gamma * 0.1;
+                gyroY = e.beta * 0.1;
+            });
+        }
+
         function animate() {
             requestAnimationFrame(animate);
 
-            // Smooth rotation for the object
-            worldObject.rotation.y += (targetRotY - worldObject.rotation.y) * 0.05;
-            worldObject.rotation.x += (targetRotX - worldObject.rotation.x) * 0.05;
+            // Rotate the world object
+            worldObject.rotation.y += 0.01;
+            worldObject.rotation.z += 0.005;
 
-            // Make the buttons "float" with the object
-            const floatOffset = Math.sin(Date.now() * 0.002) * 20;
-            btnLeft.style.transform = `translateY(${floatOffset}px) skewX(-10deg)`;
-            btnRight.style.transform = `translateY(${-floatOffset}px) skewX(-10deg)`;
+            // Camera looking logic (Touch + Gyro)
+            lat = Math.max(-85, Math.min(85, lat));
+            let phi = THREE.MathUtils.degToRad(90 - lat + gyroY);
+            let theta = THREE.MathUtils.degToRad(lon + gyroX);
+
+            camera.lookAt(
+                500 * Math.sin(phi) * Math.cos(theta),
+                500 * Math.cos(phi),
+                500 * Math.sin(phi) * Math.sin(theta)
+            );
 
             renderer.render(scene, camera);
+            labelRenderer.render(scene, camera);
         }
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            document.getElementById('overlay').style.display = 'none';
+            init();
+        });
 
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            labelRenderer.setSize(window.innerWidth, window.innerHeight);
         });
-
-        animate();
     </script>
 </body>
 </html>
