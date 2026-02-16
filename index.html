@@ -2,23 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Immersive Portfolio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>3D Mobile Portfolio</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #000; }
+        body { margin: 0; overflow: hidden; background-color: #0b0b0b; touch-action: none; }
         canvas { display: block; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
     </style>
 </head>
 <body>
 
-    <div class="absolute inset-0 z-10 flex flex-col items-center justify-center text-white pointer-events-none">
-        <h1 class="text-6xl font-bold tracking-tighter uppercase mb-4 opacity-90">Creative Developer</h1>
-        <p class="text-xl font-light tracking-widest text-gray-400">SCROLL TO EXPLORE THE WORLD</p>
-        
-        <div class="absolute bottom-10 left-10 pointer-events-auto">
-            <button class="px-6 py-2 border border-white hover:bg-white hover:text-black transition duration-300">
-                VIEW PROJECTS
+    <div class="absolute inset-0 z-10 flex flex-col justify-between p-8 text-white pointer-events-none">
+        <div class="mt-10">
+            <h1 class="text-4xl font-black tracking-tight uppercase leading-none">Creative<br><span class="text-blue-500">Vision</span></h1>
+            <p class="text-sm mt-2 text-gray-400 font-mono italic">Mobile Immersive Experience</p>
+        </div>
+
+        <div class="glass-card p-6 rounded-2xl mb-10 pointer-events-auto">
+            <h2 class="text-xl font-bold mb-1">My Projects</h2>
+            <p class="text-xs text-gray-300 mb-4">Swipe to explore the 3D space.</p>
+            <button class="w-full py-3 bg-white text-black font-bold rounded-xl active:scale-95 transition-transform">
+                ENTER WORLD
             </button>
         </div>
     </div>
@@ -36,56 +45,74 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // 1. Scene Setup
+        // 1. Scene & Renderer
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         
+        renderer.setPixelRatio(window.devicePixelRatio);
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // 2. Create a "World" (A simple 3D Geometry)
-        const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16);
+        // 2. The "World" Object (A complex shape for depth)
+        const geometry = new THREE.IcosahedronGeometry(15, 1);
         const material = new THREE.MeshStandardMaterial({ 
-            color: 0x4444ff, 
-            wireframe: true 
+            color: 0x3b82f6, 
+            wireframe: true,
+            emissive: 0x111111
         });
-        const torusKnot = new THREE.Mesh(geometry, material);
-        scene.add(torusKnot);
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
 
-        // 3. Lighting
-        const light = new THREE.PointLight(0xffffff, 1000);
-        light.position.set(20, 20, 20);
+        // 3. Lighting (Crucial for 3D depth)
+        const light = new THREE.DirectionalLight(0xffffff, 2);
+        light.position.set(10, 10, 10);
         scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040));
+        scene.add(new THREE.AmbientLight(0x404040, 5));
 
-        camera.position.z = 50;
+        camera.position.z = 40;
 
-        // 4. Animation & Interactivity
+        // 4. Mobile Touch Logic
+        let targetRotationX = 0;
+        let targetRotationY = 0;
         let mouseX = 0;
         let mouseY = 0;
+        let windowHalfX = window.innerWidth / 2;
+        let windowHalfY = window.innerHeight / 2;
 
-        window.addEventListener('mousemove', (e) => {
-            mouseX = (e.clientX - window.innerWidth / 2) / 100;
-            mouseY = (e.clientY - window.innerHeight / 2) / 100;
-        });
+        // Touch Interaction
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 0) {
+                mouseX = e.touches[0].pageX - windowHalfX;
+                mouseY = e.touches[0].pageY - windowHalfY;
+            }
+        }, { passive: true });
 
+        document.addEventListener('touchmove', (e) => {
+            if (e.touches.length > 0) {
+                targetRotationY = (e.touches[0].pageX - windowHalfX) * 0.01;
+                targetRotationX = (e.touches[0].pageY - windowHalfY) * 0.01;
+            }
+        }, { passive: true });
+
+        // 5. Animation Loop
         function animate() {
             requestAnimationFrame(animate);
 
-            // Subtle rotation and mouse response
-            torusKnot.rotation.x += 0.01;
-            torusKnot.rotation.y += 0.01;
-            
-            camera.position.x += (mouseX - camera.position.x) * 0.05;
-            camera.position.y += (-mouseY - camera.position.y) * 0.05;
-            camera.lookAt(scene.position);
+            // Smoothly interpolate rotation (Lerp)
+            mesh.rotation.y += (targetRotationY - mesh.rotation.y) * 0.05;
+            mesh.rotation.x += (targetRotationX - mesh.rotation.x) * 0.05;
+
+            // Subtle floating movement
+            mesh.position.y = Math.sin(Date.now() * 0.001) * 2;
 
             renderer.render(scene, camera);
         }
 
-        // Handle Resize
+        // Handle Orientation Change / Resize
         window.addEventListener('resize', () => {
+            windowHalfX = window.innerWidth / 2;
+            windowHalfY = window.innerHeight / 2;
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
