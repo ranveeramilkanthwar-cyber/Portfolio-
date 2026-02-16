@@ -3,185 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Engineer | 3D Cinematic Portfolio</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <title>IT Engineer | Immersive Portfolio</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Inter:wght@300;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
-        :root { --accent: #38bdf8; }
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Inter', sans-serif; color: white; }
-        canvas { display: block; filter: brightness(0.8) contrast(1.2); }
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@300;900&display=swap');
         
-        .ui-screen {
-            position: absolute; inset: 0; display: flex; flex-direction: column;
-            justify-content: center; align-items: center; pointer-events: none;
-            opacity: 0; transform: scale(1.1); transition: all 1s cubic-bezier(0.19, 1, 0.22, 1);
+        body, html { margin: 0; padding: 0; background: #000; overflow: hidden; font-family: 'Inter', sans-serif; }
+        
+        /* Video Background Styling */
+        #bg-video {
+            position: fixed; right: 0; bottom: 0;
+            min-width: 100%; min-height: 100%;
+            filter: brightness(0.6) contrast(1.1);
+            z-index: -1; transition: all 1s ease;
         }
-        .ui-screen.active { opacity: 1; transform: scale(1); pointer-events: auto; }
 
-        .glass-panel {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(20px);
+        .ui-container {
+            position: relative; height: 100vh; width: 100%;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+
+        .glass-ui {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(25px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 2.5rem; border-radius: 2px;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            padding: 3rem; border-radius: 4px; opacity: 0; transform: translateY(30px);
         }
 
-        .cinematic-title {
-            font-family: 'Syncopate', sans-serif;
-            letter-spacing: -0.05em; line-height: 0.8;
-            text-transform: uppercase;
-        }
+        .active-ui { opacity: 1 !important; transform: translateY(0) !important; transition: all 1s ease 0.5s; }
 
         .nav-btn {
-            position: fixed; bottom: 50px; right: 50px;
-            background: white; color: black; padding: 1rem 3rem;
-            font-weight: 900; letter-spacing: 0.2em; cursor: pointer;
-            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
-            transition: all 0.3s; pointer-events: auto; z-index: 100;
+            position: fixed; bottom: 40px; right: 40px;
+            background: #fff; color: #000; padding: 15px 40px;
+            font-family: 'Syncopate'; font-size: 10px; font-weight: bold;
+            cursor: pointer; z-index: 100; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
         }
-        .nav-btn:hover { background: var(--accent); color: white; transform: translateX(-10px); }
 
-        .scanline {
-            width: 100%; height: 2px; background: rgba(56, 189, 248, 0.1);
-            position: absolute; top: 0; animation: scan 4s linear infinite;
-        }
-        @keyframes scan { from { top: 0; } to { top: 100%; } }
-
-        .vignette {
-            position: fixed; inset: 0;
-            background: radial-gradient(circle, transparent 20%, black 120%);
-            pointer-events: none;
-        }
+        .cinematic-text { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: -2px; }
+        
+        .overlay { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, black 150%); pointer-events: none; }
     </style>
 </head>
 <body>
 
-    <div class="vignette"></div>
-    <div class="scanline"></div>
+    <div class="overlay"></div>
 
-    <div id="layer-0" class="ui-screen active">
-        <h2 class="text-sky-400 font-mono tracking-[1em] mb-4 text-xs animate-pulse">SYSTEM INITIALIZED</h2>
-        <h1 class="cinematic-title text-7xl md:text-9xl font-bold">PORTFOLIO<br><span class="text-sky-500">2026</span></h1>
-        <p class="mt-8 text-gray-500 font-light tracking-widest max-w-md text-center">ACCESSING SECURE DATA FOR 1ST YEAR IT ENGINEERING STUDENT</p>
-    </div>
+    <video autoplay muted loop id="bg-video">
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-futuristic-city-at-night-with-bright-lights-32514-large.mp4" type="video/mp4">
+    </video>
 
-    <div id="layer-1" class="ui-screen">
-        <div class="glass-panel max-w-xl">
-            <h4 class="text-sky-500 font-mono text-xs mb-2">PROJECT_MANIFEST_01</h4>
-            <h2 class="text-5xl font-black mb-4 uppercase">SARWA AI</h2>
-            <p class="text-gray-400 leading-relaxed mb-6">Autonomous assistant built on n8n and Gemini. Designed to bypass manual cloud console tasks through direct API integration.</p>
-            <div class="h-1 w-20 bg-sky-500"></div>
+    <div class="ui-container">
+        <div id="home" class="glass-ui active-ui text-center">
+            <h4 class="text-sky-400 font-mono tracking-[0.5em] text-[10px] mb-4">SYSTEM STATUS: ONLINE</h4>
+            <h1 class="cinematic-text text-7xl md:text-9xl font-bold text-white leading-[0.8]">PORTFOLIO<br>2026</h1>
+            <p class="text-gray-400 mt-6 tracking-[0.3em] font-light">1ST YEAR IT ENGINEERING STUDENT</p>
         </div>
     </div>
 
-    <div id="layer-2" class="ui-screen">
-        <div class="glass-panel max-w-xl">
-            <h4 class="text-sky-500 font-mono text-xs mb-2">PROJECT_MANIFEST_02</h4>
-            <h2 class="text-5xl font-black mb-4 uppercase">QR GENERATOR</h2>
-            <p class="text-gray-400 leading-relaxed mb-6">Linking web interfaces with Telegram Bot databases for secure, instant QR retrieval and storage.</p>
-            <div class="h-1 w-20 bg-sky-500"></div>
-        </div>
-    </div>
-
-    <div id="layer-3" class="ui-screen">
-        <div class="text-center">
-            <h2 class="text-8xl font-black italic mb-4">SKILLS</h2>
-            <div class="flex gap-4 justify-center">
-                <span class="border border-white/20 px-6 py-2 font-mono">C++</span>
-                <span class="border border-white/20 px-6 py-2 font-mono">PYTHON</span>
-                <span class="border border-white/20 px-6 py-2 font-mono">JS</span>
-            </div>
-        </div>
-    </div>
-
-    <div class="nav-btn" onclick="nextSection()">NEXT MISSION</div>
+    <div class="nav-btn" onclick="triggerTransition()">NEXT MISSION</div>
 
     <script>
-        // --- 3D WORLD CONSTRUCTION ---
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(window.devicePixelRatio);
-        document.body.appendChild(renderer.domElement);
+        let currentStage = 0;
+        const stages = ['projects.html', 'about.html'];
 
-        // Environment (The City/Space vibe)
-        const grid = new THREE.GridHelper(400, 80, 0x1e293b, 0x080c14);
-        grid.position.y = -5;
-        scene.add(grid);
-
-        const starsGeo = new THREE.BufferGeometry();
-        const starsCount = 3000;
-        const posArray = new Float32Array(starsCount * 3);
-        for(let i=0; i < starsCount * 3; i++) {
-            posArray[i] = (Math.random() - 0.5) * 100;
+        function triggerTransition() {
+            // Smoothly fade out the current content
+            gsap.to(".glass-ui", { opacity: 0, y: -50, duration: 0.8, onComplete: () => {
+                // Redirect to the next page
+                window.location.href = stages[currentStage];
+            }});
         }
-        starsGeo.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-        const starsMat = new THREE.PointsMaterial({ size: 0.02, color: 0x38bdf8 });
-        const starMesh = new THREE.Points(starsGeo, starsMat);
-        scene.add(starMesh);
-
-        // Building blocks (Mimics city silhouette)
-        const boxGeo = new THREE.BoxGeometry(2, 10, 2);
-        for(let i=0; i<40; i++) {
-            const boxMat = new THREE.MeshBasicMaterial({ color: 0x0f172a, wireframe: true });
-            const box = new THREE.Mesh(boxGeo, boxMat);
-            box.position.set((Math.random()-0.5)*100, 0, (Math.random()-0.5)*100);
-            scene.add(box);
-        }
-
-        camera.position.set(0, 2, 15);
-
-        // --- NAVIGATION LOGIC ---
-        let currentSection = 0;
-        const totalSections = 4;
-
-        function nextSection() {
-            currentSection = (currentSection + 1) % totalSections;
-            
-            // 1. Update UI
-            document.querySelectorAll('.ui-screen').forEach((s, i) => {
-                s.classList.toggle('active', i === currentSection);
-            });
-
-            // 2. Cinematic Camera Move
-            const positions = [
-                {x: 0, y: 2, z: 15, rx: 0},
-                {x: 10, y: 5, z: -10, rx: 0.2},
-                {x: -15, y: 2, z: -30, rx: -0.1},
-                {x: 0, y: 15, z: -50, rx: 0.5}
-            ];
-
-            const target = positions[currentSection];
-            
-            gsap.to(camera.position, {
-                x: target.x, y: target.y, z: target.z,
-                duration: 2.5, ease: "expo.inOut"
-            });
-            gsap.to(camera.rotation, {
-                x: target.rx,
-                duration: 2.5, ease: "expo.inOut"
-            });
-
-            // 3. Audio Effect (Visual Mockup)
-            console.log("Section Engaged: " + currentSection);
-        }
-
-        // Animation Loop
-        function animate() {
-            requestAnimationFrame(animate);
-            starMesh.rotation.y += 0.0005;
-            renderer.render(scene, camera);
-        }
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
 </html>
