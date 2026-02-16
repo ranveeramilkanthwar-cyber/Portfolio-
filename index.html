@@ -3,27 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GTA V Immersive World</title>
+    <title>GTA V Time Globe</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.cdnfonts.com/css/pricedown');
         body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Pricedown', sans-serif; }
         
-        /* GTA Style Tethered Buttons */
         .gta-nav-btn {
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            border: 2px solid #fff;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            border-left: 6px solid #46a049;
             color: white;
             padding: 12px 25px;
-            font-size: 22px;
+            font-size: 20px;
             text-decoration: none;
             pointer-events: auto;
             white-space: nowrap;
-            box-shadow: 0 0 15px rgba(255,255,255,0.3);
-            transition: 0.3s;
+            transition: 0.2s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
-        .gta-nav-btn:active { background: #46a049; color: white; border-color: #46a049; }
+        .gta-nav-btn:active { background: #fff; color: #000; }
 
         #overlay {
             position: fixed; inset: 0; background: #000; z-index: 1000;
@@ -34,15 +33,13 @@
 <body>
 
     <div id="overlay">
-        <h1 class="text-6xl mb-8">PORTFOLIO V</h1>
-        <button id="start-btn" class="gta-nav-btn">ENTER LOS SANTOS</button>
+        <h1 class="text-6xl mb-6 tracking-widest">LOADING...</h1>
+        <button id="start-btn" class="gta-nav-btn">START MISSION</button>
     </div>
 
-    <div class="fixed top-5 left-5 z-50 pointer-events-none">
-        <div class="text-white text-3xl">STORY MODE</div>
-    </div>
-    <div class="fixed top-5 right-5 z-50 text-right pointer-events-none">
-        <div class="text-green-500 text-5xl"></div>
+    <div class="fixed top-6 right-6 z-50 text-right pointer-events-none">
+        <div id="clock" class="text-white text-4xl mb-1">12:00</div>
+        <div class="text-green-500 text-5xl">$2,000,000</div>
     </div>
 
     <div id="container"></div>
@@ -55,59 +52,61 @@
         import * as THREE from 'three';
         import { CSS2DRenderer, CSS2DObject } from 'https://unpkg.com/three@0.160.0/examples/jsm/renderers/CSS2DRenderer.js';
 
-        let scene, camera, renderer, labelRenderer, globe;
-        let lon = 0, lat = 0, phi = 0, theta = 0;
-        let isUserInteracting = false;
+        let scene, camera, renderer, labelRenderer, timeGlobe;
+        let lon = 0, lat = 0;
+        let touchX = 0, touchY = 0;
 
         function init() {
             scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1100);
+            // Camera FOV adjusted to make the globe "Fit" the mobile screen
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1100);
+            camera.position.z = 40;
 
-            // 1. 360 Video Background
+            // 1. GTA Video Background (The Sky)
             const video = document.createElement('video');
-            video.src = 'https://assets.mixkit.co/videos/preview/mixkit-top-view-of-a-group-of-elephants-4441-large.mp4'; // REPLACE WITH GTA CLIP
+            video.src = 'https://assets.mixkit.co/videos/preview/mixkit-top-view-of-a-group-of-elephants-4441-large.mp4'; 
             video.loop = true; video.muted = true; video.play();
             
             const texture = new THREE.VideoTexture(video);
-            const skyGeo = new THREE.SphereGeometry(500, 60, 40);
-            skyGeo.scale(-1, 1, 1);
-            const sky = new THREE.Mesh(skyGeo, new THREE.MeshBasicMaterial({ map: texture }));
+            const sky = new THREE.Mesh(
+                new THREE.SphereGeometry(500, 60, 40),
+                new THREE.MeshBasicMaterial({ map: texture, side: THREE.BackSide, opacity: 0.6, transparent: true })
+            );
             scene.add(sky);
 
-            // 2. The Globe (The "World" Circle)
-            const globeGeo = new THREE.SphereGeometry(12, 32, 32);
+            // 2. The Time Globe (Fitting the Screen)
+            // Use TorusKnot for "Circle of Triangles" or Sphere for "World"
+            const globeGeo = new THREE.IcosahedronGeometry(12, 1); // Techy "World" look
             const globeMat = new THREE.MeshStandardMaterial({ 
                 color: 0xffffff, 
-                wireframe: true,
-                transparent: true,
-                opacity: 0.7
+                wireframe: true, 
+                emissive: 0x46a049,
+                emissiveIntensity: 0.5
             });
-            globe = new THREE.Mesh(globeGeo, globeMat);
-            scene.add(globe);
+            timeGlobe = new THREE.Mesh(globeGeo, globeMat);
+            scene.add(timeGlobe);
 
-            // Lighting for the globe
-            const light = new THREE.PointLight(0xffffff, 2000);
-            light.position.set(0, 20, 30);
-            scene.add(light);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-
-            // 3. Tethering Buttons to the Globe
-            const createBtn = (text, url, x) => {
+            // 3. Tethered Buttons (Opposite Sides)
+            const addBtn = (text, url, x) => {
                 const el = document.createElement('a');
-                el.href = url;
-                el.className = 'gta-nav-btn';
-                el.textContent = text;
+                el.href = url; el.className = 'gta-nav-btn'; el.textContent = text;
                 const obj = new CSS2DObject(el);
                 obj.position.set(x, 0, 0);
-                return obj;
+                timeGlobe.add(obj);
             };
+            addBtn('PROJECTS', 'projects.html', -18);
+            addBtn('ABOUT', 'about.html', 18);
 
-            globe.add(createBtn('PROJECTS', 'projects.html', -20));
-            globe.add(createBtn('ABOUT', 'about.html', 20));
+            // 4. Lights
+            const pLight = new THREE.PointLight(0xffffff, 1000);
+            pLight.position.set(20, 20, 20);
+            scene.add(pLight);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
 
             // Renderers
-            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
             document.getElementById('container').appendChild(renderer.domElement);
 
             labelRenderer = new CSS2DRenderer();
@@ -116,49 +115,40 @@
             labelRenderer.domElement.style.top = '0px';
             document.getElementById('container').appendChild(labelRenderer.domElement);
 
-            setupInputs();
+            setupControls();
+            updateTime();
             animate();
         }
 
-        function setupInputs() {
-            // Mouse/Touch Interaction
-            const onPointerMove = (e) => {
-                if (e.isPrimary === false) return;
-                lon += e.movementX * 0.15;
-                lat -= e.movementY * 0.15;
-                
-                // Rotate the globe when you move
-                globe.rotation.y += e.movementX * 0.005;
-                globe.rotation.x += e.movementY * 0.005;
-            };
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
+            setTimeout(updateTime, 1000);
+        }
+
+        function setupControls() {
+            // Touch/Mouse move
+            document.addEventListener('pointermove', (e) => {
+                touchX = (e.clientX - window.innerWidth / 2) * 0.01;
+                touchY = (e.clientY - window.innerHeight / 2) * 0.01;
+            });
 
             // Gyroscope
             window.addEventListener('deviceorientation', (e) => {
-                const gx = e.gamma * 0.1;
-                const gy = e.beta * 0.1;
-                globe.rotation.y = THREE.MathUtils.degToRad(gx * 5);
-                globe.rotation.x = THREE.MathUtils.degToRad(gy * 5);
-                
-                // Move camera view slightly with gyro
-                lon += gx * 0.05;
-                lat += gy * 0.05;
+                touchX += e.gamma * 0.01;
+                touchY += e.beta * 0.01;
             });
-
-            document.addEventListener('pointermove', onPointerMove);
         }
 
         function animate() {
             requestAnimationFrame(animate);
 
-            lat = Math.max(-85, Math.min(85, lat));
-            phi = THREE.MathUtils.degToRad(90 - lat);
-            theta = THREE.MathUtils.degToRad(lon);
+            // Clockwise Rotation
+            timeGlobe.rotation.y -= 0.005; 
 
-            camera.lookAt(
-                500 * Math.sin(phi) * Math.cos(theta),
-                500 * Math.cos(phi),
-                500 * Math.sin(phi) * Math.sin(theta)
-            );
+            // Add Interaction offset
+            timeGlobe.rotation.y += touchX * 0.1;
+            timeGlobe.rotation.x += touchY * 0.1;
 
             renderer.render(scene, camera);
             labelRenderer.render(scene, camera);
