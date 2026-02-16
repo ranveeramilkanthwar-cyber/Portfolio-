@@ -3,33 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>3D Mobile Portfolio</title>
+    <title>3D World Navigation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #0b0b0b; touch-action: none; }
+        body { margin: 0; overflow: hidden; background-color: #050505; touch-action: none; font-family: sans-serif; }
         canvas { display: block; }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+
+        /* Glassmorphism Buttons */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            pointer-events: auto;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .glass-nav:active {
+            transform: scale(0.9);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Container to center the buttons on the globe */
+        #ui-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            pointer-events: none;
+            z-index: 20;
         }
     </style>
 </head>
 <body>
 
-    <div class="absolute inset-0 z-10 flex flex-col justify-between p-8 text-white pointer-events-none">
-        <div class="mt-10">
-            <h1 class="text-4xl font-black tracking-tight uppercase leading-none">Creative<br><span class="text-blue-500">Vision</span></h1>
-            <p class="text-sm mt-2 text-gray-400 font-mono italic">Mobile Immersive Experience</p>
-        </div>
-
-        <div class="glass-card p-6 rounded-2xl mb-10 pointer-events-auto">
-            <h2 class="text-xl font-bold mb-1">My Projects</h2>
-            <p class="text-xs text-gray-300 mb-4">Swipe to explore the 3D space.</p>
-            <button class="w-full py-3 bg-white text-black font-bold rounded-xl active:scale-95 transition-transform">
-                ENTER WORLD
-            </button>
-        </div>
+    <div id="ui-layer">
+        <a href="projects.html" class="glass-nav text-center">Projects</a>
+        <a href="about.html" class="glass-nav text-center">About Me</a>
     </div>
 
     <div id="canvas-container"></div>
@@ -45,7 +68,6 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // 1. Scene & Renderer
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -54,65 +76,63 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('canvas-container').appendChild(renderer.domElement);
 
-        // 2. The "World" Object (A complex shape for depth)
-        const geometry = new THREE.IcosahedronGeometry(15, 1);
+        // 1. The Globe (Icosahedron for a techy look)
+        const geometry = new THREE.IcosahedronGeometry(12, 2);
         const material = new THREE.MeshStandardMaterial({ 
-            color: 0x3b82f6, 
+            color: 0x4444ff, 
             wireframe: true,
-            emissive: 0x111111
+            transparent: true,
+            opacity: 0.6
         });
-        const mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
+        const globe = new THREE.Mesh(geometry, material);
+        scene.add(globe);
 
-        // 3. Lighting (Crucial for 3D depth)
-        const light = new THREE.DirectionalLight(0xffffff, 2);
-        light.position.set(10, 10, 10);
+        // Inner glowing core
+        const coreGeo = new THREE.SphereGeometry(6, 32, 32);
+        const coreMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true, transparent: true, opacity: 0.2 });
+        const core = new THREE.Mesh(coreGeo, coreMat);
+        scene.add(core);
+
+        // 2. Lighting
+        const light = new THREE.PointLight(0xffffff, 500);
+        light.position.set(10, 10, 20);
         scene.add(light);
-        scene.add(new THREE.AmbientLight(0x404040, 5));
+        scene.add(new THREE.AmbientLight(0x404040, 2));
 
         camera.position.z = 40;
 
-        // 4. Mobile Touch Logic
-        let targetRotationX = 0;
-        let targetRotationY = 0;
-        let mouseX = 0;
-        let mouseY = 0;
+        // 3. Touch Controls
+        let targetRotY = 0;
+        let targetRotX = 0;
         let windowHalfX = window.innerWidth / 2;
         let windowHalfY = window.innerHeight / 2;
 
-        // Touch Interaction
-        document.addEventListener('touchstart', (e) => {
-            if (e.touches.length > 0) {
-                mouseX = e.touches[0].pageX - windowHalfX;
-                mouseY = e.touches[0].pageY - windowHalfY;
-            }
-        }, { passive: true });
-
         document.addEventListener('touchmove', (e) => {
             if (e.touches.length > 0) {
-                targetRotationY = (e.touches[0].pageX - windowHalfX) * 0.01;
-                targetRotationX = (e.touches[0].pageY - windowHalfY) * 0.01;
+                targetRotY = (e.touches[0].pageX - windowHalfX) * 0.005;
+                targetRotX = (e.touches[0].pageY - windowHalfY) * 0.005;
             }
         }, { passive: true });
 
-        // 5. Animation Loop
+        // 4. Animation Loop
         function animate() {
             requestAnimationFrame(animate);
 
-            // Smoothly interpolate rotation (Lerp)
-            mesh.rotation.y += (targetRotationY - mesh.rotation.y) * 0.05;
-            mesh.rotation.x += (targetRotationX - mesh.rotation.x) * 0.05;
+            // Smooth rotation based on touch
+            globe.rotation.y += (targetRotY - globe.rotation.y) * 0.05;
+            globe.rotation.x += (targetRotX - globe.rotation.x) * 0.05;
+            
+            // Core rotates opposite for cool effect
+            core.rotation.y -= 0.005;
 
-            // Subtle floating movement
-            mesh.position.y = Math.sin(Date.now() * 0.001) * 2;
+            // Gentle floating animation
+            globe.position.y = Math.sin(Date.now() * 0.001) * 1.5;
+            core.position.y = globe.position.y;
 
             renderer.render(scene, camera);
         }
 
-        // Handle Orientation Change / Resize
         window.addEventListener('resize', () => {
-            windowHalfX = window.innerWidth / 2;
-            windowHalfY = window.innerHeight / 2;
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
