@@ -2,44 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio | Projects</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background: #0f172a; color: white; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .card:hover { border-color: #38bdf8; transform: translateY(-5px); transition: all 0.3s ease; }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <link rel="stylesheet" href="style.css"> <style>
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@300;900&display=swap');
+        body { background: #000; color: white; overflow: hidden; font-family: 'Inter'; }
+        .project-card { background: rgba(255,255,255,0.05); backdrop-filter: blur(15px); border-left: 4px solid #38bdf8; }
+        .nav-btn-back { position: fixed; bottom: 40px; left: 40px; background: rgba(255,255,255,0.1); color: #fff; padding: 15px 40px; cursor: pointer; font-family: 'Syncopate'; font-size: 10px; }
     </style>
 </head>
-<body class="p-8 lg:p-24">
-
-    <nav class="fixed top-8 left-1/2 -translate-x-1/2 glass px-8 py-3 rounded-full flex gap-10 z-50">
-        <a href="index.html" class="hover:text-sky-400 transition tracking-widest text-xs uppercase">Home</a>
-        <a href="projects.html" class="text-sky-400 font-bold tracking-widest text-xs uppercase">Projects</a>
-        <a href="about.html" class="hover:text-sky-400 transition tracking-widest text-xs uppercase">About</a>
-    </nav>
-
-    <h2 class="text-5xl font-black mb-16 mt-12 uppercase tracking-tighter">Selected Missions</h2>
-
-    <div class="grid md:grid-cols-2 gap-10">
-        <div class="glass p-8 card rounded-2xl">
-            <h3 class="text-2xl font-bold mb-2">Sarwa AI Assistant</h3>
-            <p class="text-gray-400 mb-6">A Gemini-powered AI agent built with n8n workflow automation to handle complex tasks.</p>
-            <span class="text-xs font-mono text-sky-500 uppercase">n8n • Gemini API • Automation</span>
+<body class="flex items-center justify-center min-h-screen">
+    <div class="max-w-6xl w-full p-10 grid grid-cols-1 md:grid-cols-2 gap-8" id="content">
+        
+        <div class="project-card p-10 transform translate-x-[-100px] opacity-0" id="p1">
+            <h4 class="text-sky-500 font-mono text-xs mb-2">MISSION_01</h4>
+            <h2 class="text-4xl font-black uppercase mb-4">SARWA AI</h2>
+            <p class="text-gray-400">n8n + Gemini automation for Google Cloud tasks.</p>
         </div>
 
-        <div class="glass p-8 card rounded-2xl">
-            <h3 class="text-2xl font-bold mb-2">QR Telegram Linker</h3>
-            <h4 class="text-sm text-sky-400 font-mono mb-4 underline">Active Development</h4>
-            <p class="text-gray-400 mb-6">Web interface for QR generation with backend data persistence via Telegram Bot API.</p>
-            <span class="text-xs font-mono text-sky-500 uppercase">HTML • JS • Telegram Bot API</span>
-        </div>
-
-        <div class="glass p-8 card rounded-2xl">
-            <h3 class="text-2xl font-bold mb-2">Cloud Lab Co-Pilot</h3>
-            <p class="text-gray-400 mb-6">Automating Google Cloud Console workflows to streamline laboratory assignments.</p>
-            <span class="text-xs font-mono text-sky-500 uppercase">GCP • Python • Automation</span>
+        <div class="project-card p-10 transform translate-x-[100px] opacity-0" id="p2">
+            <h4 class="text-sky-500 font-mono text-xs mb-2">MISSION_02</h4>
+            <h2 class="text-4xl font-black uppercase mb-4">QR BOT</h2>
+            <p class="text-gray-400">Telegram Bot integrated with HTML/JS web panel.</p>
         </div>
     </div>
+
+    <div class="nav-btn-back" onclick="window.location.href='index.html'">BACK</div>
+    <div class="fixed bottom-[40px] right-[40px] bg-white text-black px-10 py-4 font-bold cursor-pointer" onclick="window.location.href='about.html'">NEXT</div>
+
+    <script>
+        window.onload = () => {
+            gsap.to("#p1", { opacity: 1, x: 0, duration: 1, ease: "power4.out" });
+            gsap.to("#p2", { opacity: 1, x: 0, duration: 1, ease: "power4.out", delay: 0.2 });
+        }
+    </script>
 </body>
 </html>
