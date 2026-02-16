@@ -3,77 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IT Engineer | Immersive Portfolio</title>
+    <title>3D Immersive Portfolio</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@300;900&display=swap');
-        
-        body, html { margin: 0; padding: 0; background: #000; overflow: hidden; font-family: 'Inter', sans-serif; }
-        
-        /* Video Background Styling */
-        #bg-video {
-            position: fixed; right: 0; bottom: 0;
-            min-width: 100%; min-height: 100%;
-            filter: brightness(0.6) contrast(1.1);
-            z-index: -1; transition: all 1s ease;
-        }
-
-        .ui-container {
-            position: relative; height: 100vh; width: 100%;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-        }
-
-        .glass-ui {
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 3rem; border-radius: 4px; opacity: 0; transform: translateY(30px);
-        }
-
-        .active-ui { opacity: 1 !important; transform: translateY(0) !important; transition: all 1s ease 0.5s; }
-
-        .nav-btn {
-            position: fixed; bottom: 40px; right: 40px;
-            background: #fff; color: #000; padding: 15px 40px;
-            font-family: 'Syncopate'; font-size: 10px; font-weight: bold;
-            cursor: pointer; z-index: 100; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
-        }
-
-        .cinematic-text { font-family: 'Syncopate', sans-serif; text-transform: uppercase; letter-spacing: -2px; }
-        
-        .overlay { position: fixed; inset: 0; background: radial-gradient(circle, transparent 30%, black 150%); pointer-events: none; }
+        body { margin: 0; overflow: hidden; background-color: #000; }
+        canvas { display: block; }
     </style>
 </head>
 <body>
 
-    <div class="overlay"></div>
-
-    <video autoplay muted loop id="bg-video">
-        <source src="https://assets.mixkit.co/videos/preview/mixkit-futuristic-city-at-night-with-bright-lights-32514-large.mp4" type="video/mp4">
-    </video>
-
-    <div class="ui-container">
-        <div id="home" class="glass-ui active-ui text-center">
-            <h4 class="text-sky-400 font-mono tracking-[0.5em] text-[10px] mb-4">SYSTEM STATUS: ONLINE</h4>
-            <h1 class="cinematic-text text-7xl md:text-9xl font-bold text-white leading-[0.8]">PORTFOLIO<br>2026</h1>
-            <p class="text-gray-400 mt-6 tracking-[0.3em] font-light">1ST YEAR IT ENGINEERING STUDENT</p>
+    <div class="absolute inset-0 z-10 flex flex-col items-center justify-center text-white pointer-events-none">
+        <h1 class="text-6xl font-bold tracking-tighter uppercase mb-4 opacity-90">Creative Developer</h1>
+        <p class="text-xl font-light tracking-widest text-gray-400">SCROLL TO EXPLORE THE WORLD</p>
+        
+        <div class="absolute bottom-10 left-10 pointer-events-auto">
+            <button class="px-6 py-2 border border-white hover:bg-white hover:text-black transition duration-300">
+                VIEW PROJECTS
+            </button>
         </div>
     </div>
 
-    <div class="nav-btn" onclick="triggerTransition()">NEXT MISSION</div>
+    <div id="canvas-container"></div>
 
-    <script>
-        let currentStage = 0;
-        const stages = ['projects.html', 'about.html'];
-
-        function triggerTransition() {
-            // Smoothly fade out the current content
-            gsap.to(".glass-ui", { opacity: 0, y: -50, duration: 0.8, onComplete: () => {
-                // Redirect to the next page
-                window.location.href = stages[currentStage];
-            }});
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+          }
         }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // 1. Scene Setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // 2. Create a "World" (A simple 3D Geometry)
+        const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16);
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0x4444ff, 
+            wireframe: true 
+        });
+        const torusKnot = new THREE.Mesh(geometry, material);
+        scene.add(torusKnot);
+
+        // 3. Lighting
+        const light = new THREE.PointLight(0xffffff, 1000);
+        light.position.set(20, 20, 20);
+        scene.add(light);
+        scene.add(new THREE.AmbientLight(0x404040));
+
+        camera.position.z = 50;
+
+        // 4. Animation & Interactivity
+        let mouseX = 0;
+        let mouseY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX - window.innerWidth / 2) / 100;
+            mouseY = (e.clientY - window.innerHeight / 2) / 100;
+        });
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Subtle rotation and mouse response
+            torusKnot.rotation.x += 0.01;
+            torusKnot.rotation.y += 0.01;
+            
+            camera.position.x += (mouseX - camera.position.x) * 0.05;
+            camera.position.y += (-mouseY - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+
+            renderer.render(scene, camera);
+        }
+
+        // Handle Resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
     </script>
 </body>
 </html>
