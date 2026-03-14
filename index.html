@@ -2,159 +2,147 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GTA Portfolio</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranveer Amilkanthwar | Portfolio</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        @import url('https://fonts.cdnfonts.com/css/pricedown');
-        body { margin: 0; overflow: hidden; background: #000; touch-action: none; font-family: 'Pricedown', sans-serif; }
+        :root { --glass-bg: rgba(255, 255, 255, 0.1); --text-color: #ffffff; --bg-gradient: linear-gradient(135deg, #0f172a, #1e293b); }
+        .theme-bright { --glass-bg: rgba(255, 255, 255, 0.7); --text-color: #1e293b; --bg-gradient: linear-gradient(135deg, #f8fafc, #e2e8f0); }
+        .theme-grey { --glass-bg: rgba(100, 116, 139, 0.2); --text-color: #f1f5f9; --bg-gradient: linear-gradient(135deg, #334155, #475569); }
         
-        .gta-nav-btn {
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
-            border-left: 6px solid #46a049;
-            color: white;
-            padding: 12px 25px;
-            font-size: 20px;
-            text-decoration: none;
-            pointer-events: auto;
-            white-space: nowrap;
-            transition: 0.2s;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-        }
-        .gta-nav-btn:active { background: #fff; color: #000; }
-
-        #overlay {
-            position: fixed; inset: 0; background: #000; z-index: 1000;
-            display: flex; justify-content: center; align-items: center;
-        }
+        body { background: var(--bg-gradient); color: var(--text-color); transition: all 0.5s ease; min-height: 100vh; font-family: 'Inter', sans-serif; }
+        .glass { background: var(--glass-bg); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+        .ai-char { width: 150px; height: 150px; border-radius: 50%; border: 4px solid #3b82f6; transition: transform 0.3s; cursor: pointer; }
+        .ai-char:hover { transform: scale(1.1) rotate(5deg); }
+        .hidden-admin-trigger { position: fixed; bottom: 10px; right: 10px; width: 5px; height: 5px; opacity: 0.1; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <div id="overlay">
-        <button id="start-btn" class="gta-nav-btn">ENTER WORLD</button>
+    <header class="p-6 flex justify-between items-center">
+        <h1 class="text-2xl font-bold tracking-tighter">RA.Portfolio</h1>
+        <div class="glass p-2 flex gap-4">
+            <button onclick="setTheme('bright')" class="p-2 hover:text-blue-500"><i class="fas fa-sun"></i></button>
+            <button onclick="setTheme('dark')" class="p-2 hover:text-blue-500"><i class="fas fa-moon"></i></button>
+            <button onclick="setTheme('grey')" class="p-2 hover:text-blue-500"><i class="fas fa-circle-half-stroke"></i></button>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto p-4 space-y-8">
+        <section class="glass p-8 flex flex-col md:flex-row items-center gap-8">
+            <div class="relative">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Addy" alt="AI Character Addy" class="ai-char shadow-2xl" id="addy-img">
+                <div class="absolute -bottom-2 -right-2 bg-blue-600 text-[10px] px-2 py-1 rounded-full uppercase font-bold">AI Agent</div>
+            </div>
+            <div class="flex-1 text-center md:text-left">
+                <h2 id="name-display" class="text-5xl font-extrabold mb-2">Ranveer Rajesh Amilkanthwar</h2>
+                <p id="college-display" class="text-xl opacity-80">First-year IT Engineering | MGM's College of Engineering</p>
+                <div class="mt-4 flex flex-wrap gap-2 justify-center md:justify-start">
+                    <span class="bg-blue-500/20 px-3 py-1 rounded-full text-sm">Python</span>
+                    <span class="bg-green-500/20 px-3 py-1 rounded-full text-sm">Gemini API</span>
+                    <span class="bg-purple-500/20 px-3 py-1 rounded-full text-sm">n8n Automation</span>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid md:grid-cols-2 gap-8">
+            <section class="glass p-6">
+                <h3 class="text-2xl font-bold mb-4 border-b border-white/10 pb-2"><i class="fas fa-trophy mr-2 text-yellow-500"></i>Achievements</h3>
+                <p id="achievement-display" class="text-lg italic text-blue-400">Loading achievement...</p>
+            </section>
+
+            <section class="glass p-6">
+                <h3 class="text-2xl font-bold mb-4 border-b border-white/10 pb-2"><i class="fas fa-code mr-2 text-blue-500"></i>Live Tech Stack</h3>
+                <div id="stack-display" class="flex flex-wrap gap-2"></div>
+            </section>
+        </div>
+
+        <section class="glass p-8">
+            <h3 class="text-3xl font-bold mb-6">Innovative Projects</h3>
+            <div id="projects-container" class="grid md:grid-cols-3 gap-6">
+                </div>
+        </section>
+    </main>
+
+    <div id="admin-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
+        <div class="glass max-w-lg w-full p-8 text-white">
+            <div class="flex justify-between mb-4">
+                <h2 class="text-2xl font-bold">Admin Panel</h2>
+                <button onclick="toggleAdmin()"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="login-form" class="space-y-4">
+                <input type="password" id="admin-pass" placeholder="Secret Access Key" class="w-full p-3 rounded-lg bg-white/10 border border-white/20 focus:outline-none">
+                <button onclick="loginAdmin()" class="w-full bg-blue-600 p-3 rounded-lg font-bold hover:bg-blue-700">Unlock Dashboard</button>
+            </div>
+            <div id="edit-form" class="hidden space-y-4">
+                <input type="text" id="edit-name" placeholder="Name" class="w-full p-2 bg-white/10 border border-white/20 rounded">
+                <input type="text" id="edit-achieve" placeholder="Top Achievement" class="w-full p-2 bg-white/10 border border-white/20 rounded">
+                <textarea id="edit-projects" placeholder="Projects (JSON format)" class="w-full h-32 p-2 bg-white/10 border border-white/20 rounded"></textarea>
+                <button onclick="saveData()" class="w-full bg-green-600 p-3 rounded-lg font-bold">Apply Changes Live</button>
+            </div>
+        </div>
     </div>
 
-    <div class="fixed top-6 right-6 z-50 text-right pointer-events-none">
-        <div class="text-green-500 text-5xl">$2,000,000</div>
-    </div>
-
-    <div id="container"></div>
-
-    <script type="importmap">
-        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
-    </script>
+    <div class="hidden-admin-trigger" onclick="toggleAdmin()"></div>
 
     <script type="module">
-        import * as THREE from 'three';
-        import { CSS2DRenderer, CSS2DObject } from 'https://unpkg.com/three@0.160.0/examples/jsm/renderers/CSS2DRenderer.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        let scene, camera, renderer, labelRenderer, timeGlobe;
-        let targetRotationX = 0, targetRotationY = 0;
-        let isTouching = false;
+        const firebaseConfig = { 
+            apiKey: "YOUR_API_KEY",
+            projectId: "YOUR_PROJECT_ID",
+            appId: "YOUR_APP_ID"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-        function init() {
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 1100);
-            camera.position.z = 40;
+        // UI Helpers
+        window.setTheme = (t) => {
+            document.body.className = t === 'dark' ? '' : 'theme-' + t;
+        };
 
-            // 1. GTA Video Background
-            const video = document.createElement('video');
-            video.src = 'https://assets.mixkit.co/videos/preview/mixkit-top-view-of-a-group-of-elephants-4441-large.mp4'; 
-            video.loop = true; video.muted = true; video.play();
-            
-            const texture = new THREE.VideoTexture(video);
-            const sky = new THREE.Mesh(
-                new THREE.SphereGeometry(500, 60, 40),
-                new THREE.MeshBasicMaterial({ map: texture, side: THREE.BackSide, opacity: 0.7, transparent: true })
-            );
-            scene.add(sky);
+        window.toggleAdmin = () => {
+            document.getElementById('admin-modal').classList.toggle('hidden');
+        };
 
-            // 2. The Globe (Static until touched)
-            const globeGeo = new THREE.IcosahedronGeometry(13, 1); 
-            const globeMat = new THREE.MeshStandardMaterial({ 
-                color: 0xffffff, 
-                wireframe: true, 
-                emissive: 0x46a049,
-                emissiveIntensity: 0.4
-            });
-            timeGlobe = new THREE.Mesh(globeGeo, globeMat);
-            scene.add(timeGlobe);
+        window.loginAdmin = () => {
+            const pass = document.getElementById('admin-pass').value;
+            if(pass === "9822709229") { // Using phone as secret key for demo
+                document.getElementById('login-form').classList.add('hidden');
+                document.getElementById('edit-form').classList.remove('hidden');
+            } else { alert("Unauthorized"); }
+        };
 
-            // 3. Tethered Buttons
-            const addBtn = (text, url, x) => {
-                const el = document.createElement('a');
-                el.href = url; el.className = 'gta-nav-btn'; el.textContent = text;
-                const obj = new CSS2DObject(el);
-                obj.position.set(x, 0, 0);
-                timeGlobe.add(obj);
-            };
-            addBtn('PROJECTS', 'projects.html', -20);
-            addBtn('ABOUT', 'about.html', 20);
-
-            // 4. Lights
-            const pLight = new THREE.PointLight(0xffffff, 1000);
-            pLight.position.set(20, 20, 20);
-            scene.add(pLight);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-
-            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            document.getElementById('container').appendChild(renderer.domElement);
-
-            labelRenderer = new CSS2DRenderer();
-            labelRenderer.setSize(window.innerWidth, window.innerHeight);
-            labelRenderer.domElement.style.position = 'absolute';
-            labelRenderer.domElement.style.top = '0px';
-            document.getElementById('container').appendChild(labelRenderer.domElement);
-
-            setupControls();
-            animate();
-        }
-
-        function setupControls() {
-            // Touch interactions
-            document.addEventListener('touchstart', () => { isTouching = true; });
-            document.addEventListener('touchend', () => { isTouching = false; });
-            
-            document.addEventListener('touchmove', (e) => {
-                const touch = e.touches[0];
-                // Using delta to move the globe based on swipe
-                timeGlobe.rotation.y += (touch.clientX - (window.innerWidth / 2)) * 0.0001;
-                timeGlobe.rotation.x += (touch.clientY - (window.innerHeight / 2)) * 0.0001;
-            }, { passive: true });
-
-            // Gyroscope tracking
-            window.addEventListener('deviceorientation', (e) => {
-                // Subtle rotation based on phone tilt
-                timeGlobe.rotation.y += e.gamma * 0.002;
-                timeGlobe.rotation.x += e.beta * 0.002;
-            });
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            // No auto-rotation logic here anymore
-            renderer.render(scene, camera);
-            labelRenderer.render(scene, camera);
-        }
-
-        document.getElementById('start-btn').addEventListener('click', () => {
-            document.getElementById('overlay').style.display = 'none';
-            init();
-            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-                DeviceOrientationEvent.requestPermission();
+        // Real-time Data Sync
+        onSnapshot(doc(db, "users", "ranveer"), (snap) => {
+            if (snap.exists()) {
+                const data = snap.data();
+                document.getElementById('name-display').innerText = data.name;
+                document.getElementById('achievement-display').innerText = data.achievement;
+                document.getElementById('edit-name').value = data.name;
+                document.getElementById('edit-achieve').value = data.achievement;
+                
+                // Build Project Cards
+                const container = document.getElementById('projects-container');
+                container.innerHTML = data.projects.map(p => `
+                    <div class="glass p-4 border border-white/5 hover:bg-white/10 transition">
+                        <h4 class="font-bold text-lg">${p.title}</h4>
+                        <p class="text-sm opacity-70">${p.desc}</p>
+                    </div>
+                `).join('');
             }
         });
 
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            labelRenderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        window.saveData = async () => {
+            await updateDoc(doc(db, "users", "ranveer"), {
+                name: document.getElementById('edit-name').value,
+                achievement: document.getElementById('edit-achieve').value
+            });
+            toggleAdmin();
+            alert("Updated!");
+        };
     </script>
 </body>
 </html>
